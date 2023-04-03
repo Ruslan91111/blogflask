@@ -34,7 +34,7 @@ def create():
         error = None
 
         if not title:
-            error = 'Title is required.'
+            error = 'Заголовок не должен быть пустым.'
 
         if error is not None:
             flash(error)
@@ -83,7 +83,7 @@ def update(id):
         error = None
 
         if not title:
-            error = 'Необходим заголовок'
+            error = 'Заголовок не должен быть пустым.'
 
         if error is not None:
             flash(error)
