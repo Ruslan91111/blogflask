@@ -22,18 +22,23 @@ def test_register(client, app):
         ).fetchone() is not None
 
 
-# Проверяем работу регистрации при неправильном вводе данных.
+# Проверяем работу регистрации при неправильном вводе данных (не ввели имя, не ввели пароль).
 @pytest.mark.parametrize(('username', 'password', 'message'), (
-    ('', '', b'"username" required'),
-    ('a', '', b'"password" required'),
+    ('', '', 'Необходимо ввести имя пользователя.'),
+    ('a', '', 'Необходимо ввести пароль.'),
+    ('test', 'test', f"Пользователь с именем test уже зарегистрирован.")
 ))
 def test_register_validate_input(client, username, password, message):
     response = client.post(
         '/auth/register',
         data={'username': username, 'password': password}
     )
-    print(response.data)
-    assert message in response.data
+    # Находятся ли перечисленные в parametrize сообщения в ответе.
+    assert message in response.get_data(as_text=True)
+
+# data содержит ответ в байтах. Байты сравниваются с байтами.
+# Если нужно сравнить текст, то следует использовать
+# !!! get_data(as_text=True).
 
 
 # Тестируем работу входа.
@@ -42,7 +47,7 @@ def test_login(client, auth):
     assert client.get('/auth/login').status_code == 200
     response = auth.login()
     # Проверка перенаправления
-    assert response.headers['location'] == '/'
+    assert response.headers["Location"] == "/"
 
     # Работа клиента.
     with client:
@@ -53,14 +58,12 @@ def test_login(client, auth):
 
 # Тестируем вхождение на сайт, параметризуя данные.
 @pytest.mark.parametrize(('username', 'password', 'message'), (
-    ('a', 'test', b'Incorrect username.'),
-    ('test', 'a', b'Incorrect password.'),
+    ('a', 'test', 'Неверное имя пользователя.'),
+    ('test', 'a', 'Неверный пароль.'),
 ))
 def test_login_validate_input(auth, username, password, message):
     response = auth.login(username, password)
-    print(response)
-
-    assert message in response.data
+    assert message in response.get_data(as_text=True)
 
 
 # Тестирование выхода из учетной записи.

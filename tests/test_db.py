@@ -28,7 +28,8 @@ def test_init_db_command(runner, monkeypatch):
         Recorder.called = True
 
     monkeypatch.setattr('blog.db.init_db', fake_init_db)
-    # Вызвать функцию командой init-db
+
+    # Вызвать функцию командой init-db при помощи фикстуры runner.
     result = runner.invoke(args=['init-db'])
     # Проверка на сообщение об инициализации данных в терминале.
     assert 'База данных инициализирована' in result.output

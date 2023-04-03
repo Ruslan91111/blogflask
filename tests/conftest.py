@@ -51,11 +51,13 @@ def runner(app):
     return app.test_cli_runner()
 
 
-# Проверка аутентификации
+# Аутентификация
 class AuthActions(object):
+    # Инициализировать (создать) клиента-сущность для имитации клиента(для запросов).
     def __init__(self, client):
         self._client = client
 
+    # Вход клиента на сайт.
     def login(self, username='test', password='test'):
         return self._client.post(
             '/auth/login',
@@ -66,6 +68,8 @@ class AuthActions(object):
         return self._client.get('/auth/logout')
 
 
+# Данная фикстура позволяет вызывать auth.login(), чтобы войти как тестовый пользователь.
+# То есть совершать действия(создавать, удалять пост) как вошедший пользователь.
 @pytest.fixture
 def auth(client):
     return AuthActions(client)
