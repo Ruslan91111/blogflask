@@ -5,13 +5,13 @@ from flask import Flask
 from . import db, auth, post
 
 
-# Фабрика приложения.
-# Принимает на вход конфигурацию.
-def create_app(test_config=None):
+# Создает само приложение.
+def create_app(test_config=None):  # Принимает на вход конфигурацию.
     # Создать экземпляр Flask
     # instance_relative_config - говорит приложению о том, что файл с конфигурациями
     # находится в папке instance, которая рядом с папкой приложением
     app = Flask(__name__, instance_relative_config=True)
+
     # Несколько настроек по умолчанию.
     app.config.from_mapping(
         SECRET_KEY='dev',
@@ -22,10 +22,10 @@ def create_app(test_config=None):
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
     else:
-        # Если нет, то используются настройки по умолчанию
+        # Если нет, то используются настройки по умолчанию, указанные в параметрах функции.
         app.config.from_mapping(test_config)
 
-        # Проверить наличие папки instance.
+    # Проверить наличие папки instance
     try:
         os.makedirs(app.instance_path)
     except OSError:
