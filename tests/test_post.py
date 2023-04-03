@@ -23,7 +23,7 @@ def test_index(client, auth):
     '/1/update',
     '/1/delete',
 ))
-def test_login_required(app, client, auth):
+def test_login_required(app, client, path):
     # Меняем автора поста.
     with app.app_context():
         db = get_db()
@@ -46,3 +46,52 @@ def test_exists_required(client, auth, path):
     auth.login()
     assert client.post(path).status_code == 404
 
+
+def test_create(client,auth, app):
+    # Залогиниться
+    auth.login()
+    # Проверка кода соединения
+    assert client.get('/create').status_code == 200
+    # Создаем пост
+    client.post('/create', data={'title': 'created', 'body': ''})
+
+    with app.app_context():
+        # Устанавливаем соединение с базой
+        db = get_db()
+        count = db.execute('SELECT COUNT(id) FROM post').fetchone()[0]
+        assert count == 2
+
+
+def test_update(client, auth, app):
+    auth.login()
+    assert client.get('/1/update').status_code == 200
+    client.post('/1/update', data={'title': 'updated', 'body': ''})
+
+    # Проверяем, что изменение в заголовке поста сохраняются в БД.
+    with app.app_context():
+        db = get_db()
+        post = db.execute('SELECT * FROM post WHERE id =1').fetchone()
+        assert post['title'] == 'updated'
+
+
+@pytest.mark.parametrize('path', (
+    '/create',
+    '/1/update',
+))
+# Проверка на валидность введенных данных - нельзя передавать пустую строку
+def test_create_update_validate(client, auth, path):
+    auth.login()
+    response = client.post(path, data={'title': '', 'body': ''})
+    assert b'Title is required.' in response.data
+
+
+# Тестирование удаления поста
+def test_delete(client, auth, app):
+    auth.login()
+    response = client.post('/1/delete')
+    assert response.headers['Location'] == '/'
+
+    with app.app_context():
+        db = get_db()
+        post = db.execute('SELECT * FROM post WHERE id =1').fetchone()
+        assert post is None

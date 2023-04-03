@@ -17,8 +17,7 @@ with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
 def app():
     # Создать временную папку для приложения и временный путь для БД.
     # По окончании теста, временный файл будет закрыт и удален
-    db_fd, db_path = tempfile.mktemp()
-
+    db_fd, db_path = tempfile.mkstemp()
     app = create_app(
         {
             'TESTING': True,
