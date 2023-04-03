@@ -18,8 +18,8 @@ def index():
     # Осуществить выборку всех постов из БД
     posts = db.execute(
         'SELECT p.id, title, body, created, author_id, username'
-        'FROM post p JOIN user u ON p.author_id = u.id'
-        'ORDER BY created DESC'
+        ' FROM post p JOIN user u ON p.author_id = u.id'
+        ' ORDER BY created DESC'
     ).fetchall()
     return render_template('post/index.html', posts=posts)
 
@@ -46,9 +46,9 @@ def create():
                 (title, body, g.user['id'])
             )
             db.commit()
-            return redirect(url_for('blog.index'))
+            return redirect(url_for('post.index'))
 
-    return render_template('blog/create.html')
+    return render_template('post/create.html')
 
 
 # Вывод одного поста.
@@ -95,9 +95,9 @@ def update(id):
                 (title, body, id)
             )
             db.commit()
-            return redirect(url_for('blog.index'))
+            return redirect(url_for('post.index'))
 
-    return render_template('blog/update.html', post=post)
+    return render_template('post/update.html', post=post)
 
 
 # Удалить пост.
@@ -111,4 +111,4 @@ def delete(id):
     # Удалить
     db.execute('DELETE FROM post WHERE id = ?', (id,))
     db.commit()
-    return redirect(url_for('blog.index'))
+    return redirect(url_for('post.index'))
