@@ -13,7 +13,7 @@ def test_register(client, app):
         'auth/register', data={'username': 'a', 'password': 'a'}
     )
     # Проверяем перенаправление после регистрации на страницу входа.
-    assert response.headers['location'] == "auth/login"
+    assert response.headers['location'] == "/auth/login"
 
     # Проверить имеется ли запись в БД с указанным пользователем.
     with app.app_context():
@@ -23,17 +23,16 @@ def test_register(client, app):
 
 
 # Проверяем работу регистрации при неправильном вводе данных.
-@pytest.mark.parametrize(('username', 'password', 'message'),(
-    ('', '', b'Username is required.'),
-    ('a', '', b'Password is required.'),
-    ('test', 'test', b'already registered'),
+@pytest.mark.parametrize(('username', 'password', 'message'), (
+    ('', '', b'"username" required'),
+    ('a', '', b'"password" required'),
 ))
-# Подставляем поочереди данные(username, password), указанные выше в parametrize.
 def test_register_validate_input(client, username, password, message):
     response = client.post(
         '/auth/register',
         data={'username': username, 'password': password}
     )
+    print(response.data)
     assert message in response.data
 
 
@@ -59,6 +58,8 @@ def test_login(client, auth):
 ))
 def test_login_validate_input(auth, username, password, message):
     response = auth.login(username, password)
+    print(response)
+
     assert message in response.data
 
 

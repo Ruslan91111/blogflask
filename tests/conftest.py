@@ -7,7 +7,7 @@ from blog import create_app
 from blog.db import get_db, init_db
 
 
-# Через контекстный менеджер открыть файл с временной конфигурацией 'data.sql'
+# Через контекстный менеджер открыть файл с временной конфигурацией DB 'data.sql'
 with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
     _data_sql = f.read().decode('utf8')
 
@@ -18,6 +18,7 @@ def app():
     # Создать временную папку для приложения и временный путь для БД.
     # По окончании теста, временный файл будет закрыт и удален
     db_fd, db_path = tempfile.mkstemp()
+    # Создать тестовое приложение. В режиме тест, путь к тестовой БД.
     app = create_app(
         {
             'TESTING': True,
@@ -26,13 +27,17 @@ def app():
     )
 
     with app.app_context():
+        # Инициализировать БД
         init_db()
+        # Выполнить содержимое 'data.sql'.
         get_db().executescript(_data_sql)
 
+    # Сохранить состояние
     yield app
 
+    # Закрыть приложение, разорвать соединение
     os.close(db_fd)
-    os.close(db_path)
+    os.unlink(db_path)
 
 
 # Тестовый клиент: запросы к приложению без запуска сервера.
